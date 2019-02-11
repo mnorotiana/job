@@ -1,0 +1,15 @@
+<ul>
+  {% for online in onlines %}
+    {% if online != app.user %}
+      {% set channel = "" %}
+      {% if online.id > app.user.id %}
+        {% set channel = "channel-"~app.user.id~"-"~online.id %}
+      {% else %}
+        {% set channel = "channel-"~online.id~"-"~app.user.id %}
+      {% endif %}
+    <a href="#" onclick="startDiscussion('{{ app.user.id }}','{{ online.id }}','{{ app.user.nom }}','{{ online.nom }}',websocket);return false;" class="active_user">{{ online.nom }}</a>
+
+    <li class="user_online"><a href="#" onclick="activateChannel('{{ channel }}');return false;">{{ online.nom }}</a></li>
+    {% endif %}
+  {% endfor %}
+</ul>

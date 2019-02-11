@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Societeusers list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for societeUser in societeUsers %}
+            <tr>
+                <td><a href="{{ path('societeuser_show', { 'id': societeUser.id }) }}">{{ societeUser.id }}</a></td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('societeuser_show', { 'id': societeUser.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('societeuser_edit', { 'id': societeUser.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('societeuser_new') }}">Create a new societeUser</a>
+        </li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Regleusers list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Type</th>
+                <th>Dossier</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for regleUser in regleUsers %}
+            <tr>
+                <td><a href="{{ path('regleuser_show', { 'id': regleUser.id }) }}">{{ regleUser.id }}</a></td>
+                <td>{{ regleUser.type }}</td>
+                <td>{{ regleUser.dossier }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('regleuser_show', { 'id': regleUser.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('regleuser_edit', { 'id': regleUser.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('regleuser_new') }}">Create a new regleUser</a>
+        </li>
+    </ul>
+{% endblock %}

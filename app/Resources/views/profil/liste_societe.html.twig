@@ -1,0 +1,41 @@
+<h1>Liste des sociétés</h1>
+<table class="datatable">
+    <thead>
+        <tr>                
+            <th>{{ 'profile.firstname'|trans }}</th>
+            <th>NIF</th>
+            <th>STAT</th>
+            <th>{{ 'profile.adresse'|trans }}</th>
+            <th>{{ 'offre.contact'|trans }}</th>
+            {% if is_granted('ROLE_ADMIN') %}<th>{{ 'buttons.actions'|trans }}</th>{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for profil in profils %}
+        <tr>            
+            <td>{{ profil.nom }}</td>
+            <td>{{ profil.nif }}</td>
+            <td>{{ profil.stat }}</td>
+            <td>{{ profil.adresse }}</td>
+            <td>
+                {% if profil.telephone is defined %}
+                <p> {{ 'profile.phone'|trans }} : {{ profil.telephone }}</p>
+                {% endif %}
+                {% if profil.email is defined %}
+                <p> {{ 'profile.email'|trans }} : {{ profil.email }}</p>
+                {% endif %}
+            </td>     
+            {% if is_granted('ROLE_ADMIN') %}
+            <td>
+                {% if profil.enabled == 1 %}
+                    <a href="{{ path('profil_delete',{'id_user':profil.id})}}" title="{{ 'buttons.deactivate'|trans }}"><i class="fa fa-minus-circle" aria-hidden="true"></i>&nbsp;</a>
+                {% else %}
+                    <a href="{{ path('profil_activate',{'id_user':profil.id})}}" title="{{ 'buttons.activate'|trans }}"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;</a>
+                {% endif %}
+
+            </td>
+            {% endif %}       
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

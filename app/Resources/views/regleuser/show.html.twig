@@ -1,0 +1,25 @@
+<form action="{{ path('regleuser_new') }}" method="POST" class="form-horizontal" id="editDossierForm"> 
+  <div class="form-group">
+    <label class="col-xs-12 col-sm-3 col-md-3 col-lg-3">{{ 'regleuser.type'|trans }}</label>
+    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+      <select name="type" class="form-control">
+        <option value="domaine" {% if regle.type == "domaine" %}selected{% endif %}>{{ 'regleuser.domaine'|trans }}</option>
+        <option value="societe" {% if regle.type == "societe" %}selected{% endif %}>{{ 'regleuser.societe'|trans }}</option>                      
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-xs-12 col-sm-3 col-md-3 col-lg-3">{{ 'regleuser.keyword'|trans }}</label>
+    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9 autocomplete">
+      <input type="text" name="motCle" value="{{ regle.motCle }}" class="form-control autocomplete-input" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-xs-12 col-sm-3 col-md-3 col-lg-3">{{ 'regleuser.dossier'|trans }}</label>
+    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+      <input type="text" name="dossier" value="{{ regle.dossier }}" class="form-control" />
+    </div>
+  </div>
+
+  <input type="hidden" name="id" value="{{ regle.id }}"/>
+</form>

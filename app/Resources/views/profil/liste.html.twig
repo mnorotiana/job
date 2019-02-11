@@ -1,0 +1,66 @@
+<h1>{{ 'profile.candidat'|trans }}</h1>
+<table class="datatable">
+    <thead>
+        <tr>                
+            <th>{{ 'profile.name'|trans }}</th>
+            <th>{{ 'profile.fonction'|trans }}</th>
+            <th>{{ 'profile.diplome'|trans }}</th>
+            <th>{{ 'offre.contact'|trans }}</th>
+            <th>{{ 'profile.statut'|trans }}</th>
+            <th>{{ 'profile.document'|trans }}</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for profil in profils %}
+
+        {% set fonction = "" %}
+        {% if profil.intitulePoste2 is defined %}
+            {% set fonction = profil.intitulePoste2 %}
+        {% elseif profil.intitulePoste2 is defined %}
+            {% set fonction = profil.intitulePoste1 %}
+        {% elseif profil.diplome2 is defined %}
+            {% set fonction = profil.diplome2 %}
+        {% else %}
+            {% set fonction = profil.diplome1 %}
+        {% endif %}
+
+        {% set diplome = "" %}
+        {% if profil.diplome2 is defined %}
+            {% set diplome = profil.diplome2 %}
+        {% else %}
+            {% set diplome = profil.diplome1 %}
+        {% endif %}
+
+        <tr>            
+            <td>{{ profil.nom~" "~profil.prenom }}</td>
+            <td>{{ fonction }}</td>
+            <td>{{ diplome }}</td>
+            <td>
+                {% if profil.telephone is defined %}
+                <p> {{ 'profile.phone'|trans }} : {{ profil.telephone }}</p>
+                {% endif %}
+                {% if profil.email is defined %}
+                <p> {{ 'profile.email'|trans }} : {{ profil.email }}</p>
+                {% endif %}
+                {% if profil.pseudoSkype is defined %}
+                <p> {{ 'profile.skype'|trans }} : {{ profil.pseudoSkype }}</p>
+                {% endif %}
+            </td>
+            <td>{{ profil.statut }}</td>
+
+            <td>
+                {% if profil.cv is defined and profil.cv is not null %}
+                <a href="{{ asset('upload/'~profil.cv) }}">CV</a>
+                {% endif %}
+
+                {% if profil.lm is defined and profil.cv is not null %}
+                <a href="{{ asset('upload'~profil.lm) }}">LM</a>
+                {% endif %}
+
+                {% if profil.diplome is defined and profil.cv is not null %}
+                <a href="{{ asset('upload'~profil.diplome) }}">{{ 'profile.diplome'|trans }}</a></td>
+                {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

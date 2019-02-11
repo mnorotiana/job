@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{asset('css/offre.css') }}" >  
+{% endblock %}
+
+{% block body %}
+	{% if type == "candidat" %}
+  	{% include "profil/liste.html.twig" %}
+  {% else %}
+  	{% include "profil/liste_societe.html.twig" %}
+  {% endif %}
+{% endblock %}

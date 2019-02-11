@@ -1,0 +1,596 @@
+{% set actualLangue = app.request.locale %}
+{% set routeParams = app.request.get('_route_params') %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <title>{% block title %}{{ 'base_message.title'|trans }} !{% endblock %}</title>
+
+        {% block stylesheets %}
+           
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
+
+        <link rel="stylesheet" href="{{ asset('css/fontawesome.css') }}">              
+               
+        <!-- Date Picker -->
+        <link rel="stylesheet" href="{{ asset('css/plugin/datepicker/datepicker3.css') }}">
+        <!-- Daterange picker -->
+        <link rel="stylesheet" href="{{ asset('css/plugin/daterangepicker/daterangepicker.css') }}">
+        <!-- bootstrap wysihtml5 - text editor -->
+        <link rel="stylesheet" href="{{ asset('css/plugin/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/plugin/select2/select2.min.css') }}">
+      <!-- iCheck for checkboxes and radio inputs -->
+        <link rel="stylesheet" href="{{ asset('css/plugin/iCheck/all.css') }}">
+
+        <link rel="stylesheet" href="{{ asset ('css/main.css')}}">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="{{ asset ('js/html5shiv.js') }}"></script>
+        <script src="{{ asset ('js/respond.js') }}"></script>
+        s<![endif]-->
+
+        <script type="text/javascript" src="{{ asset('js/jquery.js') }}"></script> 
+        <script src="{{ asset ('js/bootstrap.min.js')}}"></script>
+        
+        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>       
+        
+        <link rel="stylesheet" href="{{ asset ('css/jquery.dataTables.min.css') }}">
+
+        <script src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ asset ('css/buttons.dataTables.min.css') }}">
+
+        <script src="{{ asset('js/moment.js') }}"></script>
+        <script src="{{ asset('js/vfs_fonts.js') }}"></script>
+        <script src="{{ asset('js/jszip.min.js') }}"></script> 
+        <script src="{{ asset('js/buttons.html5.min.js') }}"></script> 
+
+        <!-- jQuery UI 1.11.4 -->
+        <script src="{{ asset('js/jquery-ui.min.js') }}"></script>
+
+        <!-- daterangepicker -->
+        <script src="{{ asset('css/plugin/daterangepicker/daterangepicker.js') }}"></script>
+        <!-- datepicker -->
+        <script src="{{ asset('css/plugin/datepicker/bootstrap-datepicker.js') }}"></script> 
+        <script src="{{ asset('js/main.js') }}"></script>
+        <!--<script src="{{ asset('js/chat.js') }}"></script>-->
+    </head>
+    <body {% if (app.user is null or app.user is not defined) and (search == 0) %}class="bg-body"{% endif %}>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 navbar">
+              <div class="row ">
+                <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                  <a href="{{ path('offre_index') }}"><img src="{{ asset('images/logo.jpg') }}" class="logo"/></a>
+                </div>
+                <div class="row col-xs-12 col-sm-9 col-md-9 col-lg-9 top-menu">
+                  {% if app.user is null or app.user is not defined %}
+                    {% for langue in ['fr','mg'] %}
+                      {% if routeParams['_locale'] is defined %}
+                        {% set routeParams = routeParams|merge({'_locale': langue}) %}
+                      {% endif %}
+                    <li><a href="{{ path(app.request.get('_route'), routeParams) }}"><img class="flag" src="{{ asset('images/'~langue~'.png')}}"></a></li>
+                    {% endfor %}
+                  <li><a href="{{ path('fos_user_security_login') }}"><i class="far fa-user-circle"></i>&nbsp;{{ 'base_message.authentication'|trans }}</a></li>
+                  {% else %}
+                  {% if is_granted('ROLE_CANDIDAT') %}
+                  <li><button class="btn btn-default pull-right" id="selectionBtn" data-toggle="modal" data-target="#selectionModal">{{ 'base_message.criteria'|trans }}</button></li>
+
+                  <li><button class="btn btn-default pull-right" id="regleBtn" data-toggle="modal" data-target="#regleModal">{{ 'base_message.dossier'|trans }}</button></li>
+
+                  {% endif %}
+                    {% for langue in ['fr','mg'] %}
+                      {% if routeParams['_locale'] is defined %}
+                        {% set routeParams = routeParams|merge({'_locale': langue}) %}
+                      {% endif %}
+                    <li><a href="{{ path(app.request.get('_route'), routeParams) }}"><img class="flag" src="{{ asset('images/'~langue~'.png')}}"></a></li>
+                    {% endfor %}
+                  <li><a href="{{ path('fos_user_profile_edit') }}">
+                    <i class="fa fa-user-circle" aria-hidden="true">&nbsp;</i>
+                        {{ 'base_message.welcome'|trans }} : {{ app.user.username }} |
+                   </a>
+                  </li>
+                  <li>
+                    <a href="{{ path('fos_user_security_logout') }}">
+                           {{ 'base_message.logout'|trans }}
+                    </a>
+                   </li>
+                  {% endif %}
+                </div>
+              </div>              
+          </div>
+
+          {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 menu">
+              <ul>                
+                {% if is_granted('ROLE_CANDIDAT') %}
+                <li class="bordered"><a href="{{ path('offre_index') }}">{{ 'base_message.title'|trans }}</a></li>
+                <li><a href="{{ path('offre_index',{'type':'selection'}) }}">{{ 'base_message.title'|trans }} {{ 'base_message.selected'|trans }}</a>
+                  <ul class="submenu">              
+                    <li><a href="{{ path('offre_index',{'type':'selection_societe'}) }}">{{ 'base_message.companies'|trans }}</a>
+                      <ul>
+                        {% for r in regles_session %}
+                          {% if r.type == "societe" %}
+                              <li><a href="{{ path('offre_index',{'type':'selection_societe','keyword':r.motCle}) }}">{{ r.dossier }}</a></li>
+                          {% endif %}
+                        {% endfor %}
+                      </ul>
+                    </li>
+                    <li><a href="{{ path('offre_index',{'type':'selection_domaine'}) }}">{{ 'base_message.domaines'|trans }}</a>
+                      <ul>
+                        {% for r in regles_session %}
+                          {% if r.type == "domaine" %}
+                              <li><a href="{{ path('offre_index',{'type':'selection_domaine','keyword':r.motCle}) }}">{{ r.dossier }}</a></li>
+                          {% endif %}
+                        {% endfor %}
+                      </ul>
+                    </li>                   
+                  </ul>
+                </li>
+                <li><a href="{{ path('candidature_index') }}">{{ 'base_message.title'|trans }} {{ 'base_message.answered'|trans }}</a></li>
+                {% elseif is_granted('ROLE_SOCIETE') %}                  
+                  <li><a href="{{ path('offre_index') }}">{{ 'base_message.offres'|trans }}</a>
+                    <ul class="submenu">    
+                      <li><a href="{{ path('offre_index',{'type':'opened'}) }}">{{ 'offre.opened'|trans }}</a></li>
+                      <li><a href="{{ path('offre_index',{'type':'closed'}) }}">{{ 'offre.closed'|trans }}</a></li>
+                      <li><a href="{{ path('offre_index',{'type':'canceled'}) }}">{{ 'offre.canceled'|trans }}</a></li>
+                      <li><a href="{{ path('offre_index',{'type':'draft'}) }}">{{ 'offre.draft'|trans }}</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="{{ path('candidature_index') }}">{{ 'candidature.liste.candidature'|trans }}</a>
+                    <ul class="submenu">    
+                      <li><a href="{{ path('candidature_index',{'type':'new'}) }}">{{ 'candidature.new'|trans }}</a></li>
+                      <li><a href="{{ path('candidature_index',{'type':'test'}) }}">{{ 'candidature.test'|trans }}</a></li>
+                      <li><a href="{{ path('candidature_index',{'type':'entretien'}) }}">{{ 'candidature.interview'|trans }}</a></li>
+                      <li><a href="{{ path('candidature_index',{'type':'rejet'}) }}">{{ 'candidature.liste.rejected'|trans }}</a></li>
+                      <li><a href="{{ path('candidature_index',{'type':'validation'}) }}">{{ 'candidature.liste.validate'|trans }}</a></li>
+                    </ul>
+                  </li>  
+                  <li class="bordered"><a href="{{ path('profil_index',{'type':'candidat'}) }}">{{ 'candidature.liste.candidat'|trans }}</a></li>               
+                {% elseif is_granted('ROLE_DGPE') or is_granted('ROLE_ADMIN') %}
+                  <li><a href="{{ path('offre_index') }}">{{ 'base_message.offre'|trans }}</a></li>
+                  <li class="bordered"><a href="{{ path('profil_index',{'type':'recruteur'}) }}">{{ 'base_message.recruteur'|trans }}</a></li>
+                  <li class="bordered"><a href="{{ path('profil_index',{'type':'candidat'}) }}">{{ 'candidature.liste.candidat'|trans }}</a></li>
+                  {% if is_granted('ROLE_ADMIN') %}
+                  <li class="bordered"><a href="{{ path('user_list') }}">{{ 'base_message.user'|trans }}</a></li>
+                  <li class="bordered"><a href="{{ path('domaine_index') }}">{{ 'base_message.all_domaine'|trans }}</a></li>
+                  <li class="bordered"><a href="{{ path('region_index') }}">{{ 'base_message.region'|trans }}</a></li>
+                  {% endif %}
+                {% endif %}
+              </ul>
+              
+            </div>
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9 apercu">
+              {% block body %}
+
+              {% endblock %}
+            </div>
+          {% else %} 
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              {% block body_unlogged %}
+
+              {% endblock %}
+            </div>            
+          {% endif %}
+        </div>
+      </div>
+      {% block javascripts %}
+          
+      {% endblock %}
+
+      <div class="modal fade" id="selectionModal" tabindex="-1" role="dialog" aria-labelledby="selectionLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="editLabel">{{ 'base_message.criteria'|trans }} </h4>
+            </div>
+            <div class="modal-body selectionForm">
+              <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <div class="panel panel-default">
+                      <div class="panel-heading">
+                          <h3 class="panel-title">{{ 'base_message.filtre_domaine'|trans }}</h3>
+                      </div>
+                      <div class="panel-body">
+                          <div class="row">
+                              <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                  <div id="domaine_list">           
+                                    {% for dom in domaines_session %}
+                                      <p>{{ dom.motCle }}<a href="{{ path('domaineuser_delete',{'id':dom.id}) }}"><i class="fa fa-remove" aria-hidden="true"></i>&nbsp;</a></p>
+                                    {% endfor %}
+                                  </div>                                  
+                              </div>
+                              <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                  <div class="form-group">                                      
+                                      <div class="col-sm-12 autocomplete">
+                                          <input type="text" name="libelle" class="form-control autocomplete-input" id="mot_cle" placeholder="Nouvelle domaine" />
+                                      </div>
+                                  </div>
+                                  <button class="btn btn-primary pull-right" onclick="addDomaine();">{{ 'buttons.add'|trans }}</button>
+                                  <input type="hidden" id="add_domaine_url" value="{{ path('domaineuser_new') }}" />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <div class="panel panel-default">
+                      <div class="panel-heading">
+                          <h3 class="panel-title">{{ 'base_message.filtre_societe'|trans }}</h3>
+                      </div>
+                      <div class="panel-body">
+                          <div class="row">
+                              <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                  <div id="societe_list">
+                                    {% for soc in societes_session %}
+                                      <p>{{ soc.username }}<a href="{{ path('societeuser_delete',{'id_societe':soc.id}) }}"><i class="fa fa-remove" aria-hidden="true"></i>&nbsp;</a></p>
+                                    {% endfor %}
+                                  </div>                                  
+                              </div>
+
+                              <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                  <div class="form-group">
+                                      <div class="col-sm-12 autocomplete">
+                                          <input type="text" name="libelle" class="form-control autocomplete-input" id="societe_nom" placeholder="Nouvelle société" />
+                                      </div>
+                                  </div>
+                                  <button class="btn btn-primary pull-right" onclick="addSociete();">{{ 'buttons.add'|trans }}</button>
+                                  <input type="hidden" id="add_societe_url" value="{{ path('societeuser_new') }}" />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="regleModal" tabindex="-1" role="dialog" aria-labelledby="regleLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="editLabel">{{ 'base_message.regle'|trans }}</h4>
+            </div>
+            <div class="modal-body regleForm">
+              <div class="row">
+                <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 buttons">
+                  <ul>
+                    <li><a href="#" onclick="return false;" data-toggle="modal" data-target="#addRegleModal">{{ 'buttons.add'|trans }}</a></li>                    
+                  </ul>
+                </div>
+                <div class="col-xs-12 col-md-12 col-sm-12 col-lg-12 regle">
+                  
+                  <table class="datatable">
+                    <thead>
+                      <tr>
+                        <th>{{ 'regleuser.dossier'|trans }}</th>
+                        <th>{{ 'regleuser.type'|trans }}</th>
+                        <th>{{ 'regleuser.keyword'|trans }}</th>
+                        <th>{{ 'buttons.actions'|trans }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for regle in regles_session %}
+                        <tr>
+                          <td>{{ regle.dossier }}</td>
+                          <td>{{ regle.type }}</td>
+                          <td>{{ regle.motCle }}</td>
+                          <td>
+                            <a href="#" onclick="editDossier('{{ regle.id }}');return false;"><i class="fa fa-edit" aria-hidden="true"></i>&nbsp;</a>
+                            <a href="{{ path('regleuser_delete',{'id':regle.id}) }}"><i class="fa fa-remove" aria-hidden="true"></i>&nbsp;</a>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  
+                  </table> 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="addRegleModal" tabindex="-1" role="dialog" aria-labelledby="regleLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="editLabel">{{ 'regleuser.new'|trans }}</h4>
+            </div>
+            <div class="modal-body regleForm">
+              <form action="{{ path('regleuser_new') }}" method="POST" class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-xs-12 col-sm-3 col-md-3 col-lg-3">{{ 'regleuser.type'|trans }}</label>
+                  <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                    <select name="type" class="form-control">
+                      <option value="domaine">{{ 'regleuser.domaine'|trans }}</option>
+                      <option value="societe">{{ 'regleuser.societe'|trans }}</option>                      
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-12 col-sm-3 col-md-3 col-lg-3">{{ 'regleuser.keyword'|trans }}</label>
+                  <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9 autocomplete">
+                    <input type="text" name="motCle" class="form-control autocomplete-input" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-12 col-sm-3 col-md-3 col-lg-3">{{ 'regleuser.dossier'|trans }}</label>
+                  <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                    <input type="text" name="dossier" class="form-control" />
+                  </div>
+                </div>
+                <input type="submit" name="{{ 'buttons.save'|trans }}"/>
+              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+
+      <div class="modal fade" id="editRegleModal" tabindex="-1" role="dialog" aria-labelledby="editRegleLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="editLabel">{{ 'regleuser.edit'|trans }} </h4>
+            </div>
+            <div class="modal-body editRegleForm">
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" id="saveEditBtn" onclick="sendEditRegle();">{{ 'buttons.edit'|trans }}</button>
+            </div>
+          </div>
+        </div>
+      </div>   
+      <input type="hidden" id="view_dossier_url" value="{{ path('regleuser_view') }}"/>
+
+      <!-- CHAT -->
+      {% if app.user %}     
+
+      <div class="row chat-div">
+          <input type="hidden" id="currentChannel" value=""/>
+          <div id="history" class="col-xs-12 col-md-10 col-sm-10 col-lg-10">            
+            
+          </div>           
+          <div class="col-xs-12 col-md-2 col-sm-2 col-lg-2">
+            <a class="btn btn-primary online-btn" data-toggle="collapse" href="#list-user" role="button" aria-expanded="false" aria-controls="list-user">
+              {{ 'user.online'|trans }}
+            </a>
+            <div class="collapse" id="list-user">
+              
+            </div>
+          </div>
+      </div>
+      <input type="hidden" id="get_message_url" value="{{ path('message_list') }}"/>
+      <input type="hidden" id="get_online_url" value="{{ path('online_list',{'id':app.user.id}) }}"/>
+
+      <script>
+          var wsUri = "ws://localhost:8080/";
+          var websocket = new WebSocket(wsUri);
+          var channel = 'channel-{{ app.user.id }}';        
+          var name = '{{ app.user.nom }}';
+          function init()
+          {          
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function(evt) { 
+              websocket.send(JSON.stringify({
+                action: 'subscribe',
+                channel: channel,
+                user: name
+              }));
+
+            };
+            websocket.onclose = function(evt) { onClose(evt) };
+            websocket.onmessage = function(evt) { onMessage(evt) };
+            websocket.onerror = function(evt) { onError(evt) };
+          }
+
+          function onClose(evt)
+          {
+            botMessageToGeneral('Connection closed');
+          }
+
+          function onMessage(evt)
+          {
+            addMessageToChannel(evt.data);
+          }
+
+          function onError(evt)
+          {
+           botMessageToGeneral('An error occured!');
+          }
+
+          $(window).on("load", function(){
+            init();
+          });
+          // This object will be sent everytime you submit a message in the sendMessage function.
+          {% set username =  app.user.nom  %}
+
+          var clientInformation = {
+              username: "{{ username }}"
+              // You can add more information in a static object
+          };         
+          
+      </script>
+      {% endif %}
+
+      <!-- END CHAT -->
+
+      <script src="{{ asset('css/plugin/select2/select2.full.min.js') }}"></script>
+	    <!-- iCheck 1.0.1 -->
+	    <script src="{{ asset('css/plugin/iCheck/icheck.min.js') }}"></script>
+	    <script src="{{ asset('css/plugin/datepicker/bootstrap-datepicker.js') }}"></script>
+      <script src="{{ asset('bundles/goswebsocket/js/vendor/autobahn.min.js') }}"></script>
+      <script src="{{ asset('bundles/goswebsocket/js/gos_web_socket_client.js') }}"></script>	    
+	    <script>  
+
+	      $(function () {
+	        //Initialize Select2 Elements
+	        $(".select2").select2({
+            allowClear: true
+          }); 
+          $(".datatable").DataTable();
+	        //Date picker
+	        $('.datepicker').datepicker({
+	          autoclose: true,
+	          format:'dd/mm/yyyy'
+	        });  
+
+          {% set domaine_str = [] %}
+          {% for domaine in domaines %}
+              {% if domaine.libelle != "" %}
+                {% set domaine_str = domaine_str|merge([domaine.libelle]) %}
+              {% endif %}
+          {% endfor %}
+
+          {% set societe_str = [] %}
+          {% for societe in societes %}
+              {% if societe.nom != "" %}
+                {% set societe_str = societe_str|merge([societe.nom]) %}
+              {% endif %}
+          {% endfor %}
+
+          {% set ville_str = [] %}
+          {% for region in regions %}
+              {% if region.nom != "" %}
+                {% set ville_str = ville_str|merge([region.nom]) %}
+              {% endif %}
+          {% endfor %}
+
+          var domaine_array = {{ domaine_str|json_encode()|raw }};
+          var societe_array = {{ societe_str|json_encode()|raw }};
+          var ville_array = {{ ville_str|json_encode()|raw }};
+          $('.autocomplete-input').on('focus',function(){
+              var id = $(this).attr('id');
+              var array_filtre = [];
+              if(id == "societe_nom")
+              {
+                  array_filtre = societe_array;
+              }
+              else if(id == "ville")
+              {
+                  array_filtre = ville_array;
+              }
+              else
+              {
+                  array_filtre = domaine_array;
+              }
+
+              autocomplete(this,array_filtre);
+          });     
+
+          /************ end chat ********/
+
+	      });
+
+        function sendMessage(chan)
+        {      
+          channel = chan;                    
+          sendTextInputContent(websocket);
+        }
+
+        function addMessageToChannel (message) {
+          var infos = jQuery.parseJSON(message);
+          var sender = infos.user;
+          var names = sender.split("##");
+          var id = "{{ app.user.id }}";
+
+          var user_class="sender";
+          if(names[1] != id)
+          {
+            user_class="receiver";
+          }
+          var id = "history"+channel;
+          var history = $('#'+id);
+          if(history.length == 0)
+          {
+            $('#history').append('<div class="channel col-xs-12 col-sm-3 col-lg-3 col-md-3" tabindex="0" onclick="activateChannel(\''+channel+'\')"><div id="'+id+'"><div class="message '+user_class+'"><span class="name">'+names[0]+'</span> : <span class="texte">' +infos.message+ '</span></div></div><div class="row"><div class="col-xs-8 col-sm-9 col-md-9 col-lg-9"><input type="text" id="message-'+channel+'" class="form-control" /><input type="hidden" id="user-'+channel+'" value="{{ app.user.nom }}##{{ app.user.id }}" /></div><div class="col-xs-4 col-sm-3 col-md-3 col-lg-3"><button class="send-btn btn btn-primary" onclick="sendMessage(\''+channel+'\')">Envoyer</button></div></div></div>');
+          }
+          else
+          {
+            $('#history'+channel).append('<div class="message '+user_class+'"><span class="name">'+names[0]+'</span> : <span class="texte">' +infos.message+ '</span></div>');
+          }
+          
+        }
+
+        function botMessageToGeneral (message) {
+          var botName = 'ChatBot';
+          return addMessageToChannel(JSON.stringify({
+            action: 'message',
+            channel: channel,
+            user: botName,
+            message: message
+          }));
+        }
+
+        function sendTextInputContent(websocket) {
+          // Get text input content   
+          var content = $('#message-'+channel).val();
+          var userName = $('#user-'+channel).val();
+          var data = JSON.stringify({
+              action: 'message',
+              user: userName,
+              message: content,
+              channel: channel
+            });
+
+          websocket.send(data);           
+          // Reset input
+          $('#message-'+channel).val('');
+        };
+
+        function startDiscussion(source_id,dest_id,source,destinataire,websocket)
+        {
+          var assoc_id = dest_id+"-"+source_id;
+
+          if(dest_id > source_id)
+          {
+            assoc_id = source_id+"-"+dest_id;
+          }
+
+          channel = 'channel-'+assoc_id;
+          websocket.send(JSON.stringify({
+            action: 'subscribe_dual',
+            channel: channel,
+            source: source,
+            destinataire: destinataire
+          }));    
+          
+          /*$('#currentChannel').val(channel);
+          activateChannel(channel);
+          */
+        }
+
+        function activateChannel(channel)
+        {
+          var urlGet = $('#get_message_url').val();
+          var DATA = 'channel=' + channel;
+          $.ajax({
+              type: "POST",
+              url: urlGet,
+              data: DATA,
+              cache: false,
+              success: function(data){
+                  $('#history').append(data);
+                  $('.channel').css('display','none');
+                  $('#history'+channel).css('display','block');
+                  $('#history'+channel).closest('div.channel').css('display','block');
+                  $('#currentChannel').val(''+channel);
+              }
+          });          
+        }
+	    </script>
+    </body>
+</html>

@@ -1,0 +1,31 @@
+
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="viewLabel">{{ offre.intitule }} - {{ offre.user.nom }}</h4>
+      </div>
+      <div class="modal-body viewBlock">
+        <label>{{ 'offre.description'|trans }}</label>
+        <p class="contenu">{{ offre.description }}</p>
+
+        <label>{{ 'offre.qualification'|trans }}</label>
+        <p class="contenu">{{ offre.qualifications }}</p>
+
+        <label>{{ 'offre.lieu'|trans }}</label>
+        <p class="contenu">{{ offre.lieu }}</p>
+
+        <label>{{ 'offre.contact'|trans }}</label>
+        <p class="contenu">{{ offre.contact }}</p>
+
+        <p class="deadline-details">{{ 'offre.validite'|trans }} {{ offre.dateCloture|date('d/m/Y') }}</p>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'buttons.close'|trans }}</button>
+        {% if offre.id not in offre_candidature %}
+            <a href="{{ path('offre_apply',{'id':offre.id}) }}" class="btn btn-primary">{{ 'buttons.apply'|trans }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>

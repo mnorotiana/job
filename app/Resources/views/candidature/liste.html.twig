@@ -1,0 +1,442 @@
+<div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+        <h1>{{ 'candidature.liste.title'|trans }}{% if type == "new" %}{{ 'candidature.liste.waiting'|trans }}{% elseif type == "test" %}en test{% elseif type == "entretien" %}{{ 'candidature.liste.interview'|trans }}{% elseif type == "rejet" %}{{ 'candidature.liste.rejected'|trans }}{% elseif type == "validation" %}{{ 'candidature.liste.valid'|trans }}{% endif %}</h1>
+    </div>
+    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+        <form method="post" action="{{ path('candidature_index') }}" class="form-horizontal" id="search">
+            <input type="text" data-placeholder="{{ 'candidature.liste.search'|trans }}" name="filtre" id="filtre" value="{{ filtre }}"/>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12">
+        {% if listCandidatures|length > 0 %}
+        <div class="row offre-content">       
+            <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 apercu">
+                <ul class="nav flex-column nav-stacked" id="nav-tab" role="tablist" aria-orientation="vertical">
+                {% set cpt = 0 %}
+                {% for key,candidatures in listCandidatures %}
+                    {% set offre = "" %}
+                    {% set candidature_obj = "" %}
+                    {% set candidat = candidatures|length %}
+                    {% set note_moyenne = 0 %}
+                    {% set note_total = 0 %}
+                    {% set compteur = 0 %}
+                    {% for i,candidature in candidatures %}
+                        {% set offre = candidature.offre %}
+                        {% set candidature_obj = candidature %}
+                        {% if candidature.note %}
+                            {% set compteur = compteur+1 %}
+                            {% set note_total = note_total+candidature.note %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if compteur > 0 %}
+                        {% set note_moyenne = note_total/compteur %}
+                    {% endif %}
+
+                    <li class="{% if cpt == 0 %}active{% endif %} nav-item nav-link">
+                        <a href="#{{ key }}" role="tab" data-toggle="tab" aria-controls="nav-info" aria-selected="true">
+                            <p class="intitule">{{ offre.intitule }} - {{ offre.user.nom }}</p>
+                            {% if is_granted('ROLE_CANDIDAT') %}
+                                {% set remarques = "" %}
+                                {% set statut = candidature_obj.statut %}
+                                {% set dateTest = candidature_obj.dateTest|date('d/m/Y H:i') %}
+                                {% set dateEntretien = candidature_obj.dateEntretien|date('d/m/Y H:i') %}
+
+                                {% if statut == "test" %}
+                                    {% set remarques = "Test prévu le "~dateTest %}
+                                {% elseif statut == "entretien" %}
+                                    {% set remarques = "Entretien prévu le "~dateEntretien %}
+                                {% elseif statut == "rejet" %}
+                                    {% set remarques = "Rejeté -"~candidature.motifs %}
+                                {% elseif statut == "validation" %}
+                                    {% set remarques = "Retenu -"~candidature.motifs %}
+                                {% elseif statut == "new" %}
+                                    {% set remarques = "En attente de traitement" %}
+                                {% elseif statut == "draft" %}
+                                    {% set remarques = "Brouillon" %}
+                                {% endif %}
+
+                            <p class="deadline">Etat:{{ remarques }} </p>
+                            {% else %}
+                            <p class="deadline">{{ candidat }} {{ 'candidature.liste.candidature'|trans }} - {{ 'candidature.liste.note'|trans }} : {{ note_moyenne }}</p>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% set cpt = cpt+1 %}                    
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8  list-overview">
+                <div class="tab-content" id="nav-tabContent">
+                    {% set cpt = 0 %}
+                    {% for key,candidatures in listCandidatures %}
+                        <div  role="tabpanel" id="{{ key }}" class="tab-pane fade in {% if cpt == 0 %}active{% endif %}">
+                            <div class="row">
+                                <!-- Section contenant tous les candidatures -->
+                                {% for i,candidature in candidatures %}
+                                    {% set profil = candidature.candidat %}
+
+                                    {% set remarques = "" %}
+                                    {% set statut = candidature.statut %}
+                                    {% set dateTest = candidature.dateTest|date('d/m/Y H:i') %}
+                                    {% set dateEntretien = candidature.dateEntretien|date('d/m/Y H:i') %}
+
+                                    {% if statut == "test" %}
+                                        {% set remarques = "Test prévu le "~dateTest %}
+                                    {% elseif statut == "entretien" %}
+                                        {% set remarques = "Entretien prévu le "~dateEntretien %}
+                                    {% elseif statut == "rejet" %}
+                                        {% set remarques = "Rejeté -"~candidature.motifs %}
+                                    {% elseif statut == "validation" %}
+                                        {% set remarques = "Retenu -"~candidature.motifs %}
+                                    {% elseif statut == "new" %}
+                                        {% set remarques = "En attente de traitement" %}
+                                    {% elseif statut == "draft" %}
+                                        {% set remarques = "Brouillon" %}
+                                    {% endif %}
+
+
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 candidatSection" id="candidat-{{ i }}">
+                                        <div class="row">
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 buttons">
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 pagination">
+                                                        <ul>
+                                                            {% if i > 0 %}
+                                                            <li>
+                                                                <a href="#" title="{{ 'candidature.liste.previous'|trans }}" onclick="previousCandidat('{{ i }}');return false;"> < Préc. </a>
+                                                            </li>
+                                                            {% endif %}
+                                                            <li>
+                                                                {{ 'candidature.liste.candidat'|trans }} #{{ i+1 }}
+                                                            </li>
+                                                            {% if i < candidatures|length-1 %}
+                                                            <li>
+                                                                <a href="#" title="{{ 'candidature.liste.next'|trans }}" onclick="nextCandidat('{{ i }}');return false;"> Suiv. > </a>
+                                                            </li>
+                                                            {% endif %}
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+                                                        {% if candidature.statut != "validation" and candidature.statut != "rejet" and is_granted('ROLE_SOCIETE') %}
+                                                        <ul>
+                                                            <li>
+                                                                <a href="#" title="{{ 'candidature.liste.reject'|trans }}" onclick="treatCandidature('{{ candidature.id }}','rejet');return false;"><i class="fa fa-thumbs-down" aria-hidden="true">{{ 'candidature.liste.reject'|trans }}</i>&nbsp;</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#" title="{{ 'candidature.liste.validate'|trans }}" onclick="treatCandidature('{{ candidature.id }}','validation');return false;"><i class="fa fa-thumbs-up" aria-hidden="true"></i>{{ 'candidature.liste.validate'|trans }}</a>
+                                                            </li>
+                                                            {% if candidature.statut == "new" %}
+                                                            <li>
+                                                                <a href="#" title="{{ 'candidature.liste.test'|trans }}" onclick="treatCandidature('{{ candidature.id }}','test');return false;"><img src="{{ asset('images/test.png') }}" class="icon_img"/>{{ 'candidature.liste.test'|trans }}</a>
+                                                            </li>
+                                                            {% endif %}
+
+                                                            {% if candidature.statut == "test" %}
+                                                            <li>
+                                                                <a href="#" title="O{{ 'candidature.liste.interviewed'|trans }}" onclick="treatCandidature('{{ candidature.id }}','entretien');return false;"><img src="{{ asset('images/interview.png') }}" class="icon_img"/>{{ 'candidature.liste.interview'|trans }}</a>
+                                                            </li> 
+                                                            {% endif %}
+                                                        </ul>
+                                                        {% elseif is_granted('ROLE_CANDIDAT') %}
+                                                            {% if statut == "draft" %}
+                                                            <ul>
+                                                                <li>
+                                                                    <a href="{{ path('offre_apply', { 'id': candidature.offre.id }) }}"><i class="fa fa-edit" aria-hidden="true">{{ 'buttons.edit'|trans }}</i></a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="{{ path('candidature_delete', { 'id': candidature.id }) }}"><i class="fa fa-remove" aria-hidden="true">{{ 'buttons.delete'|trans }}</i></a>
+                                                                </li>
+                                                            </ul>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                                <p><label>{{ 'candidature.liste.candidat'|trans }} :</label> {{ profil.nom~" "~profil.prenom }}</p>
+                                                {% set diplome = "" %}
+                                                {% if profil.diplome3 is defined %}
+                                                    {% set diplome = profil.diplome3 %}
+                                                {% elseif (profil.diplome2 is defined) %}
+                                                    {% set diplome = profil.diplome2 %}
+                                                {% else %}
+                                                    {% set diplome = profil.diplome1 %}
+                                                {% endif %}
+ 
+                                                <p class="stat">{{ diplome }}</p>
+                                                <p class="stat">{{ 'candidature.liste.status'|trans }} : {{ remarques }}</p>
+                                                <p class="underlined"></p>
+
+                                                {% if profil.cv or profil.lm or profil.diplome %}
+                                                <p><label>{{ 'profile.pj'|trans }} :</label>
+                                                    {% if profil.cv %}<a href="{{ asset('upload'~profil.cv) }}">CV</a>{% endif %}
+                                                    {% if profil.lm %}<a href="{{ asset('upload'~profil.lm) }}">LM</a>{% endif %}
+                                                    {% if profil.diplome %}<a href="{{ asset('upload'~profil.diplome) }}">{{ 'profile.diplome'|trans }}</a>{% endif %}
+                                                </p>
+                                                <p class="underlined"></p>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h3 class="panel-title">{{ 'profile.private_information'|trans }}</h3>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div class="row">
+                                                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.sexe'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.sexe }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.situation'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.situationMatrimoniale }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.name'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.nom~" "~profil.prenom }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.date_naissance'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.dateNaissance|date('d/m/Y') }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.lieu_naissance'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.lieuNaissance }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.adresse'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.adresse }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.ville'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.ville }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.cp'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.codePostal }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.phone'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.telephone }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.email'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.email }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label class="col-sm-3 control-label">{{ 'profile.skype'|trans }} :</label>
+                                                                    <div class="col-sm-9">
+                                                                        {{ profil.pseudoSkype }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h3 class="panel-title">{{ 'profile.parcours'|trans }}</h3>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <table class="datatable-no-buttons">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>{{ 'profile.diplome'|trans }}</th>
+                                                                    <th>{{ 'profile.etablissement'|trans }}</th>
+                                                                    <th>{{ 'profile.date_obtention'|trans }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>{{ profil.diplome1 }}</td>
+                                                                    <td>{{ profil.etablissement1 }}</td>
+                                                                    <td>{{ profil.dateObtention1|date('d/m/Y') }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>{{ profil.diplome2 }}</td>
+                                                                    <td>{{ profil.etablissement2 }}</td>
+                                                                    <td>{{ profil.dateObtention2|date('d/m/Y') }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>{{ profil.diplome3 }}</td>
+                                                                    <td>{{ profil.etablissement3 }}</td>
+                                                                    <td>{{ profil.dateObtention3|date('d/m/Y') }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">{{ 'profile.domaine'|trans }} :</label>
+                                                            <div class="col-sm-9">
+                                                                {{ profil.domaineCompetence }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h3 class="panel-title">{{ 'profile.experience'|trans }}</h3>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <table class="datatable-no-buttons">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>{{ 'profile.poste'|trans }}</th>
+                                                                    <th>{{ 'profile.etablissement'|trans }}</th>
+                                                                    <th>{{ 'profile.duree'|trans }}</th>
+                                                                    <th>{{ 'profile.referent'|trans }}</th>
+                                                                    <th>{{ 'profile.email_referent'|trans }}</th>
+                                                                    <th>{{ 'profile.phone_referent'|trans }}</th>
+                                                                    <th>{{ 'profile.activite'|trans }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>{{ profil.intitulePoste1 }}</td>
+                                                                    <td>{{ profil.societe1 }}</td>
+                                                                    <td>{{ profil.duree1 }}</td>
+                                                                    <td>{{ profil.referent1 }}</td>
+                                                                    <td>{{ profil.mailReferent1 }}</td>
+                                                                    <td>{{ profil.telephoneReferent1 }}</td>
+                                                                    <td>{{ profil.domainePoste1 }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>{{ profil.intitulePoste2 }}</td>
+                                                                    <td>{{ profil.societe2 }}</td>
+                                                                    <td>{{ profil.duree2 }}</td>
+                                                                    <td>{{ profil.referent2 }}</td>
+                                                                    <td>{{ profil.mailReferent2 }}</td>
+                                                                    <td>{{ profil.telephoneReferent2 }}</td>
+                                                                    <td>{{ profil.domainePoste2 }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}                                
+                            </div>
+                        </div>
+                    {% endfor %} 
+                </div>  
+            </div>
+        </div>
+        {% else %} 
+            <p>{{ 'candidature.liste.aucun'|trans }}</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<div class="modal fade" id="treatModal" tabindex="-1" role="dialog" aria-labelledby="treatModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="treatModalLabel">{{ 'candidature.modal.rejet'|trans }}</h4>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-danger alert-dismissible content-error" style="display:none">
+            <h4><i class="icon fa fa-ban"></i> {{ 'buttons.error'|trans }}!</h4>
+            <p id="content-error"></p>
+          </div>
+          <form action="{{ path('candidature_treat') }}" method="post" id="treatForm" class="form-horizontal">
+            <div class="form-group treatInfo" id="noteDiv">                
+                <label class="col-sm-3 control-label">{{ 'candidature.modal.note'|trans }}</label>        
+                <div class="col-sm-9">
+                   <input type="text" value="" name="note" id="note" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group treatInfo" id="dateEntretienDiv">                
+                <label class="col-sm-3 control-label">{{ 'candidature.modal.date_entretien'|trans }}</label>        
+                <div class="col-sm-9">
+                   <div class="input-group date">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" value="" name="dateEntretien" id="dateEntretien" class="form-control datepicker" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group treatInfo" id="dateTestDiv">                
+                <label class="col-sm-3 control-label">{{ 'candidature.modal.date_test'|trans }}</label>        
+                <div class="col-sm-9">
+                   <div class="input-group date">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" value="" name="dateTest" id="dateTest" class="form-control datepicker" />
+                    </div>
+                </div>
+
+                
+            </div>
+            <div class="form-group treatInfo" id="commentaireDiv">
+                <label class="col-sm-3 control-label">{{ 'candidature.modal.comment'|trans }}</label>        
+                <div class="col-sm-9">
+                   <textarea name="commentaire" id="commentaire" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="form-group treatInfo" id="motifDiv">
+                <label class="col-sm-3 control-label">{{ 'candidature.modal.motifs_rejet'|trans }}</label>        
+                <div class="col-sm-9">
+                   <textarea name="motifs" id="motif" class="form-control"></textarea>
+                </div>
+            </div>      
+            <input type="hidden" value="" id="type_action" name="type_action" />
+            <input type="hidden" value="" id="id_candidature" name="id" />
+          </form>            
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'buttons.close'|trans }}</button>
+          <button type="button" onclick="sendTreatForm()" class="btn btn-primary">{{ 'buttons.soumettre'|trans }}</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% block javascripts %}
+    <script>
+        $(function () {
+        //Date picker
+            $('.datepicker').datepicker({
+              autoclose: true,
+              format:'dd/mm/yyyy'
+            }); 
+        });
+    </script>
+{% endblock %}

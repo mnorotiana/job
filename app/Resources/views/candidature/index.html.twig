@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{asset('css/offre.css') }}" >  
+{% endblock %}
+
+{% block body %}
+    {% include "candidature/liste.html.twig" %}
+{% endblock %}
+
+{% block javascripts %}
+    
+    <script src="{{ asset('css/plugin/select2/select2.full.min.js') }}"></script>
+    <!-- iCheck 1.0.1 -->
+    <script src="{{ asset('css/plugin/iCheck/icheck.min.js') }}"></script>
+    <script src="{{ asset('css/plugin/datepicker/bootstrap-datepicker.js') }}"></script>
+    
+    <script>
+      $(function () {
+        //Initialize Select2 Elements
+        $(".select2").select2(); 
+        //Date picker
+        $('.datepicker').datepicker({
+          autoclose: true,
+          format:'dd/mm/yyyy'
+        });     
+      });
+    </script>
+{% endblock %}

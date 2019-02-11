@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Removedoffres list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for removedOffre in removedOffres %}
+            <tr>
+                <td><a href="{{ path('removedoffre_show', { 'id': removedOffre.id }) }}">{{ removedOffre.id }}</a></td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('removedoffre_show', { 'id': removedOffre.id }) }}">show</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    
+{% endblock %}

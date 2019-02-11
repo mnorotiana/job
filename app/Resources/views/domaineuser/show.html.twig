@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Domaineuser</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ domaineUser.id }}</td>
+            </tr>
+            <tr>
+                <th>Motcle</th>
+                <td>{{ domaineUser.motCle }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('domaineuser_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('domaineuser_edit', { 'id': domaineUser.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

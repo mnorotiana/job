@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Domaineusers list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Motcle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for domaineUser in domaineUsers %}
+            <tr>
+                <td><a href="{{ path('domaineuser_show', { 'id': domaineUser.id }) }}">{{ domaineUser.id }}</a></td>
+                <td>{{ domaineUser.motCle }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('domaineuser_show', { 'id': domaineUser.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('domaineuser_edit', { 'id': domaineUser.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('domaineuser_new') }}">Create a new domaineUser</a>
+        </li>
+    </ul>
+{% endblock %}

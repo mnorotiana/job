@@ -1,0 +1,262 @@
+{% if is_granted('ROLE_DGPE') %}
+<div class="row stat">
+  <div class="col-xs-12 col-sm-offset-1 col-sm-2 col-md-2 col-lg-2">
+    <p><span class="nombre">{{ nb_chercheur }}</span> chercheurs d'emploi</p>
+  </div>
+  <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+    <p><span class="nombre">{{ nbOpen }}</span> offres ouvertes</p>
+  </div>
+  <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+    <p><span class="nombre">{{ taux_retenu|number_format(2, '.', ',') }}%</span> candidatures retenus</p>
+    <p><span class="nombre">{{ taux_test|number_format(2, '.', ',') }}%</span>candidatures en test</p>
+    <p><span class="nombre">{{ taux_entretien|number_format(2, '.', ',') }}%</span> candidatures en entretien</p>
+  </div>
+  <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+    <p><span class="nombre">{{ taux_closed|number_format(2, '.', ',') }}%</span> offres pourvues</p>
+  </div>
+</div>
+{% endif %}
+
+<h1>Liste des offres <button class="btn btn-default pull-right" id="addBtn" data-toggle="modal" data-target="#newModal">Ajouter</button></h1>
+<table  class="datatable">
+        <thead>
+            <tr>                
+                <th>Intitule du poste</th>
+                <th>Nombre de candidats</th>
+                <th>Note moyenne</th>
+                <th>Statut</th>
+                {% if is_granted('ROLE_SOCIETE') %}
+                <th>Actions</th>
+                {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for offre in offres %}
+        {% set candidat = 0 %}
+        {% set note = 0 %}
+        {% set remarques = "" %}
+        {% set statut = offre.statut %}
+
+        {% if statut == "published" %}
+          {% set remarques = "En cours d'études" %}
+        {% elseif statut == "closed" %}
+          {% set remarques = "Clôturé" %}
+        {% elseif statut == "draft" %}
+          {% set remarques = "Non publié" %}
+        {% elseif statut == "canceled" %}
+          {% set remarques = "Annulé" %}
+        {% endif %}
+
+        {% if countCandidats['offre_'~offre.id] is defined %}
+            {% set candidat = countCandidats['offre_'~offre.id]  %}
+        {% endif %}
+
+        {% if noteCandidats['offre_'~offre.id] is defined %}
+            {% set note = noteCandidats['offre_'~offre.id]  %}
+        {% endif %}
+        <tr>
+            <td>{{ offre.intitule }} - {{ offre.lieu }}</td>
+            <td>{{ candidat }}</td>
+            <td>{{ note }}</td>
+            <td>{{ remarques }}</td>  
+            {% if is_granted('ROLE_SOCIETE') %}          
+            <td>
+                {% if statut != "closed" %}
+                <ul>
+                    {% if statut != "published" %}
+                    <li>
+                        <a href="#" title="Modifier" onclick="editOffre({{ offre.id }});return false;"><i class="fa fa-edit" aria-hidden="true"></i>&nbsp;</a>
+                    </li>
+                    <li>
+                        <a href="{{ path('offre_publish', { 'id': offre.id }) }}"><i class="fa fa-upload" aria-hidden="true">&nbsp;</i></a>
+                    </li>
+                    <li>
+                        <a href="{{ path('offre_delete', { 'id': offre.id }) }}"><i class="fa fa-remove" aria-hidden="true">&nbsp;</i></a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{{ path('offre_cancel', { 'id': offre.id }) }}"><i class="fa fa-times" aria-hidden="true">&nbsp;</i></a>
+                    </li>
+                    {% endif %}                    
+                </ul>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+<div class="col-xs-12 col-sm-12 col-md-12">
+        {% if offres|length > 0 %}
+        <div class="row offre-content">       
+            <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 apercu">
+                <ul class="nav flex-column nav-stacked" id="nav-tab" role="tablist" aria-orientation="vertical">
+                {% for key,offre in offres %}
+                    <li class="{% if key == 0 %}active{% endif %} nav-item nav-link">
+                        <a href="#info-{{ offre.id }}" role="tab" data-toggle="tab" aria-controls="nav-info" aria-selected="true">
+                            <p class="intitule">{{ offre.intitule }} - {{ offre.user.nom }}</p>
+                            <p class="deadline">Ouverte jusqu'au {{ offre.dateCloture|date('d/m/Y') }} - {{ offre.lieu }}</p>
+                        </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+                <div class="tab-content" id="nav-tabContent">
+                    {% for key,offre in offres %}                
+                    <div  role="tabpanel" id="info-{{ offre.id }}" class="tab-pane fade in {% if key == 0 %}active{% endif %}">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 buttons">
+                                <a href="{{ path('offre_apply',{'id':offre.id}) }}">Répondre</a>
+                            </div>
+                            <div>
+                                <p>Société : {{ offre.user.nom }}</p>
+                                <p>Intitulé : {{ offre.intitule }}</p>
+                                <p>Ouvert du {{ offre.datePublication|date('d/m/Y') }} au {{ offre.dateCloture|date('d/m/Y') }}</p>
+                                <p><label>Description du poste :</label></p>
+                                <p class="description">{{ offre.description }}</p>
+                                <p><label>Qualifications requises</label></p>
+                                <p class="description">{{ offre.qualifications }}</p>
+                                <p><label>Lieu d'affectation :</label> {{ offre.lieu }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %} 
+                </div>  
+            </div>
+        </div>
+        {% else %} 
+            <p>Aucune offre n'a été trouvée</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<div class="modal fade" id="newModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Ajout de nouvel offre</h4>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-danger alert-dismissible content-error" style="display:none">
+            <h4><i class="icon fa fa-ban"></i> Erreur!</h4>
+            <p id="content-error"></p>
+          </div>
+          <form action="{{ path('offre_new') }}" method="post" id="addForm" class="form-horizontal">
+            <div class="form-group">
+                {{ form_label(form.intitule, "Intitulé", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   {{ form_widget(form.intitule, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.domaine, "Domaine", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9 autocomplete">
+                   {{ form_widget(form.domaine, {'attr': {'class': 'form-control autocomplete-input'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.description, "Description", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.qualifications, "Qualifications", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   {{ form_widget(form.qualifications, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.nombre, "Nombre recherché", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   {{ form_widget(form.nombre, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.lieu, "Lieu", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   {{ form_widget(form.lieu, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.contact, "Contact", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   {{ form_widget(form.contact, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.dateCloture, "Date limite", {'label_attr': {'class': 'col-sm-3 control-label'}}) }}        
+                <div class="col-sm-9">
+                   <div class="input-group date">
+		                <div class="input-group-addon">
+		                    <i class="fa fa-calendar"></i>
+		                </div>
+		                {{ form_widget(form.dateCloture, {'attr': {'class': 'form-control'}}) }}
+		            </div>
+                </div>
+            </div>
+
+            <div class="hidden">
+            {{ form_rest(form) }}
+            </div>
+            
+          </form>            
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+          <button type="button" onclick="sendAddForm()" class="btn btn-primary">Valider</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<input type="hidden" id="edit_offre_url" value="{{ path('offre_show') }}" />
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="editLabel">Edition d'offre</h4>
+      </div>
+      <div class="modal-body editForm">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" onclick="sendEditForm()" class="btn btn-primary">Modifier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block javascripts %}
+    
+    <script src="{{ asset('css/plugin/select2/select2.full.min.js') }}"></script>
+    <!-- iCheck 1.0.1 -->
+    <script src="{{ asset('css/plugin/iCheck/icheck.min.js') }}"></script>
+    <script src="{{ asset('css/plugin/datepicker/bootstrap-datepicker.js') }}"></script>
+    
+    <script>
+      $(function () {
+        //Initialize Select2 Elements
+        $(".select2").select2(); 
+        //Date picker
+        $('.datepicker').datepicker({
+          autoclose: true,
+          format:'dd/mm/yyyy'
+        });     
+      });
+    </script>
+{% endblock %}

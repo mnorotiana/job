@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>{{ 'profile.domaine'|trans }} <a href="{{ path('domaine_new') }}" class="btn btn-default pullRight">{{ 'buttons.add'|trans }}</a></h1>
+    <table class="datatable">
+        <thead>
+            <tr>
+                <th>{{ 'domaine.libelle'|trans }}</th>
+                <th>{{ 'buttons.actions'|trans }}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for domaine in domaines %}
+            <tr>
+                <td>{{ domaine.libelle }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('domaine_edit', { 'id': domaine.id }) }}"><i class="fa fa-edit" aria-hidden="true"></i>&nbsp;</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('domaine_delete', { 'id': domaine.id }) }}"><i class="fa fa-remove" aria-hidden="true">&nbsp;</i></a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+{% block javascripts %}
+    
+    <script src="{{ asset('css/plugin/select2/select2.full.min.js') }}"></script>
+    <!-- iCheck 1.0.1 -->
+    <script src="{{ asset('css/plugin/iCheck/icheck.min.js') }}"></script>
+    <script src="{{ asset('css/plugin/datepicker/bootstrap-datepicker.js') }}"></script>
+    
+    <script>
+      $(function () {
+        //Initialize Select2 Elements
+        $(".select2").select2(); 
+        //Date picker
+        $('.datepicker').datepicker({
+          autoclose: true,
+          format:'dd/mm/yyyy'
+        });     
+      });
+    </script>
+{% endblock %}

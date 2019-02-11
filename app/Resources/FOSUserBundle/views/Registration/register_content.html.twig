@@ -1,0 +1,94 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+<h2> {{ 'layout.register' |trans }} </h2>
+
+<div class="error">
+    {{ form_errors(form) }}
+    {% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+</div>
+
+<form action="{{ path("fos_user_registration_register") }}" method="post" class="form-horizontal">
+    {% if csrf_token %}
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+    {% endif %}   
+
+    <div class="form-group">
+        <label for="roles" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">Type utilisateur</label>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            {{ form_widget(form.roles, {'attr': {'class': 'role_user'}}) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="nom" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">{{ 'profile.show.firstname'|trans }}</label>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    <div class="form-group role_societe">
+        <label for="nif" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">NIF</label>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            {{ form_widget(form.nif, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    <div class="form-group role_societe">
+        <label for="stat" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">STAT</label>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            {{ form_widget(form.stat, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="adresse" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">{{ 'profile.show.address'|trans }}</label>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            {{ form_widget(form.adresse, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="telephone" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">{{ 'profile.show.phone'|trans }}</label>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="email" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">{{ 'profile.show.email'|trans }}</label>      
+        <div class="col-sm-8">
+           {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="username" class="col-xs-12 col-sm-4 col-md-4 col-lg-4">{{ 'security.login.username'|trans }}</label>       
+        <div class="col-sm-8">
+           {{ form_widget(form.username, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    {% for key,passwordField in form.plainPassword %}
+        <div class="form-group">
+        	{% if key == 'first' %}
+           		<label class="col-xs-12 col-sm-4 col-md-4 col-lg-4"> {{ 'security.login.password'|trans }}</label>  
+           	{% else %}      
+           		<label class="col-xs-12 col-sm-4 col-md-4 col-lg-4">{{ 'form.password_confirmation'|trans }}</label>
+           	{% endif %}
+            <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+               {{ form_widget(passwordField, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+    {% endfor %}
+
+    {{ form_rest(form)}}
+
+    <div class="form-group">
+        <div class=" pull-right">
+            <a href="{{ path('fos_user_security_login') }}" class="btn btn-default">Se connecter</a>
+            <input type="submit" id="_submit" name="_submit" value="{{ 'registration.submit'|trans }}" class="btn btn-primary" />
+        </div>
+    </div>
+</form>

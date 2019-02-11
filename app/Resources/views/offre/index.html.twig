@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{asset('css/offre.css') }}" >  
+{% endblock %}
+
+
+{% block body %}
+    {% if app.user %}        
+        {% include "offre/liste.html.twig" %}
+    {% endif %}
+{% endblock %}
+
+{% block body_unlogged %}
+    {% if search == 0 %}
+    <div class="row">   
+        <div class="col-xs-12 col-sm-offset-2 col-sm-8 col-md-8 search-box">
+            <h1 class="title-lg">{{ 'offre.search'|trans }}</h1>
+            <form method="post" action="{{ path('offre_index') }}" class="form-inline" id="searchOffre">
+                <div class="row">
+                    <div class="col-sm-5">          
+                        <div class="autocomplete">
+                          <input type="text" data-placeholder="{{ 'profile.domaine'|trans }}" name="domaine" id="domaine" value="{{ domaine }}" class="form-control autocomplete-input"/>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="autocomplete">
+                          <input type="text" data-placeholder="{{ 'profile.ville'|trans }}" name="ville" id="ville" value="{{ ville }}" class="form-control autocomplete-input"/>
+                        </div> 
+                    </div>
+                    <input type="submit" value="{{ 'buttons.search'|trans }}" class="btn btn-primary pull-right btn-search"/>
+                </div>
+            </form>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 liste_accueil">
+            {% include "offre/liste.html.twig" %}
+        </div>
+    </div>
+    {% else %}
+        <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 menu">
+            <ul>
+                <li class="bordered"><a href="{{ path('offre_index') }}">{{ 'offre.liste'|trans }}</a></li>
+            </ul>
+        </div>
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9 apercu">
+            {% include "offre/liste.html.twig" %}
+
+    {% endif %}
+    
+{% endblock %}
+
+{% set domaine_str = [] %}
+{% for domaine in domaines %}
+    {% if domaine.libelle != "" %}
+      {% set domaine_str = domaine_str|merge([domaine.libelle]) %}
+    {% endif %}
+{% endfor %}

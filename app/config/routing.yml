@@ -1,0 +1,30 @@
+user_user:
+    resource: "@UserBundle/Controller/UserController.php"
+    type:     annotation
+
+recruitment:
+    resource: "@RecruitmentBundle/Controller/"
+    type:     annotation
+    prefix:   /{_locale}/
+    requirements:
+        _locale: mg|fr
+
+user:
+    resource: "@UserBundle/Controller/"
+    type:     annotation
+    prefix:   /{_locale}/
+    requirements:
+        _locale: mg|fr
+
+app:
+    resource: '@AppBundle/Controller/'
+    type: annotation
+    
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+#fos_message:
+#    resource: "@FOSMessageBundle/Resources/config/routing.xml"
+#    prefix: /{_locale}/messages
+#    requirements:
+#        _locale: mg|fr
